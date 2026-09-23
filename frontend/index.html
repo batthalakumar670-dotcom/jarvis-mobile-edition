@@ -1,13 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
 
-<!DOCTYPE html> <html> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width,
-initial-scale=1"> <title>J.A.R.V.I.S</title> <link rel="stylesheet" href="style.css"> </head> <body> <header><
-h1>J.A.R.V.I.S</h1><p>PERSONAL AI ASSISTANT</p></header> <div class="core"> <div class="ring r1"></div> <div c
-lass="ring r2"></div> <div class="center"></div> </div> <p class="core-text">SYSTEM READY</p> <div class="stat
-us"> <h2>SYSTEM DIAGNOSTICS</h2> <div class="row"><span>AI ENGINE</span><b class="on">● OPERATIONAL</b></div>
-<div class="row"><span>CONNECTION</span><b class="on">● ONLINE</b></div> <div class="row"><span>VOICE INTERFAC
-E</span><b class="on">● READY</b></div> <div class="row"><span>LONG-TERM MEMORY</span><b class="on">● ACTIVE</
-b></div> </div> <div class="chat" id="chat"></div> <div class="input-area"> <input id="msg" placeholder="Enter
-a command for J.A.R.V.I.S..."> <button id="send">EXECUTE</button> <button id="mic-btn" aria-label="Activate vo
-ice input">🎙</button> <button id="cam-btn" aria-label="Analyze image">📷</button> <button id="clear-btn">CLEA
-R MEMORY</button> <input id="img-input" type="file" accept="image/*" style="display:none"> </div> <script src
-="script.js"></script> </body> </html>
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#000000"
+    >
+
+    <title>J.A.R.V.I.S Mobile Edition</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+    <header>
+        <h1>J.A.R.V.I.S</h1>
+        <p>PERSONAL AI ASSISTANT</p>
+    </header>
+
+
+    <!-- JARVIS CORE -->
+
+    <section class="core-section">
+
+        <div class="core">
+
+            <div class="ring r1"></div>
+
+            <div class="ring r2"></div>
+
+            <div class="center"></div>
+
+        </div>
+
+        <p class="core-text">
+            SYSTEM READY
+        </p>
+
+    </section>
+
+
+    <!-- SYSTEM STATUS -->
+
+    <section class="status">
+
+        <h2>SYSTEM DIAGNOSTICS</h2>
+
+        <div class="row">
+            <span>AI ENGINE</span>
+            <b class="on">● OPERATIONAL</b>
+        </div>
+
+        <div class="row">
+            <span>CONNECTION</span>
+            <b class="on">● ONLINE</b>
+        </div>
+
+        <div class="row">
+            <span>VOICE INTERFACE</span>
+            <b class="on">● READY</b>
+        </div>
+
+        <div class="row">
+            <span>LONG-TERM MEMORY</span>
+            <b class="on">● ACTIVE</b>
+        </div>
+
+    </section>
+
+
+    <!-- CHAT -->
+
+    <section
+        class="chat"
+        id="chat"
+        aria-live="polite"
+    ></section>
+
+
+    <!-- INPUT AREA -->
+
+    <section class="input-area">
+
+        <input
+            id="msg"
+            type="text"
+            placeholder="Enter a command for J.A.R.V.I.S..."
+            autocomplete="off"
+        >
+
+        <button
+            id="send"
+            type="button"
+        >
+            EXECUTE
+        </button>
+
+
+        <!-- MIC / CAMERA / CLEAR BUTTONS
+             Loaded from mic-button.html -->
+
+        <div
+            id="assistant-buttons"
+            class="assistant-buttons"
+        >
+            Loading controls...
+        </div>
+
+    </section>
+
+
+    <!-- IMAGE INPUT -->
+
+    <input
+        id="img-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+    >
+
+
+    <script>
+
+        // Load separate controls file
+        fetch("mic-button.html")
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Could not load mic-button.html"
+                    );
+                }
+
+                return response.text();
+            })
+
+            .then(html => {
+
+                document.getElementById(
+                    "assistant-buttons"
+                ).innerHTML = html;
+
+                // Load script after controls exist
+                const script =
+                    document.createElement("script");
+
+                script.src = "script.js";
+
+                document.body.appendChild(script);
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+                document.getElementById(
+                    "assistant-buttons"
+                ).innerHTML =
+                    "Controls failed to load.";
+
+            });
+
+    </script>
+
+</body>
+
+</html>
