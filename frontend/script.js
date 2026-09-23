@@ -453,15 +453,9 @@ if (imgInput) {
             const file =
                 event.target.files?.[0];
 
-
             if (!file) return;
 
-
-            if (
-                !file.type.startsWith(
-                    "image/"
-                )
-            ) {
+            if (!file.type.startsWith("image/")) {
 
                 addMessage(
                     "J.A.R.V.I.S: Please select an image.",
@@ -471,66 +465,117 @@ if (imgInput) {
                 return;
             }
 
-
             const reader =
                 new FileReader();
 
+            reader.onload = async () => {
 
-            reader.onload =
-                async () => {
+                const result =
+                    reader.result;
 
-                    const result =
-                        reader.result;
+                if (
+                    typeof result !== "string"
+                ) {
+                    return;
+                }
 
+                const base64 =
+                    result.split(",")[1];
 
-                    if (
-                        typeof result !==
-                        "string"
-                    ) {
-                        return;
-                    }
+                const question =
+                    input.value.trim() ||
+                    "Describe this image.";
 
+                // Show the actual photo in chat
+                const userMessage =
+                    document.createElement("div");
 
-                    const base64 =
-                        result.split(",")[1];
+                userMessage.className =
+                    "msg user";
 
+                const label =
+                    document.createElement("div");
 
-                    const question =
-                        input.value.trim() ||
-                        "Describe this image.";
+                label.textContent =
+                    "YOU: 📷";
 
+                userMessage.appendChild(label);
 
-                    addMessage(
-                        "YOU: [IMAGE] " +
-                        question,
-                        "user"
-                    );
+                const image =
+                    document.createElement("img");
 
+                image.src = result;
 
-                    input.value = "";
+                image.alt =
+                    "Captured image";
 
+                image.style.maxWidth =
+                    "100%";
 
-                    await askVision(
-                        base64,
-                        file.type,
-                        question
-                    );
+                image.style.width =
+                    "280px";
 
-                };
+                image.style.borderRadius =
+                    "12px";
 
+                image.style.marginTop =
+                    "8px";
+
+                image.style.display =
+                    "block";
+
+                userMessage.appendChild(image);
+
+                const questionText =
+                    document.createElement("div");
+
+                questionText.textContent =
+                    question;
+
+                questionText.style.marginTop =
+                    "8px";
+
+                userMessage.appendChild(
+                    questionText
+                );
+
+                chat.appendChild(
+                    userMessage
+                );
+
+                chat.scrollTop =
+                    chat.scrollHeight;
+
+                input.value = "";
+
+                // Send image to Gemini
+                await askVision(
+                    base64,
+                    file.type,
+                    question
+                );
+            };
+
+            reader.onerror = () => {
+
+                addMessage(
+                    "J.A.R.V.I.S: Failed to read the image.",
+                    "ai"
+                );
+            };
 
             reader.readAsDataURL(file);
 
-
-            // Allow same image again
+            // Allow the same image to be selected again
             event.target.value = "";
-
         }
     );
 }
 
 
-// ==================== VISION ====================
+// ======================================================
+// VISION
+// ======================================================
 
 async function askVision(
     base64,
@@ -544,123 +589,158 @@ async function askVision(
             "ai"
         );
 
-
     try {
 
-        const url =
-            "https://generativelanguage.googleapis.com/v1beta/models/" +
-            MODELS[0] +
-            ":generateContent?key=" +
-            encodeURIComponent(API_KEY);
+        if (!API_KEY) {
+            throw new Error(
+                "Gemini API key is missing."
+            );
+        }
 
+        let lastError;
 
-        const response =
-            await fetch(url, {
+        for (const model of MODELS) {
 
-                method: "POST",
+            try {
 
-                headers: {
-                    "Content-Type":
-                        "application/json"
-                },
+                const url =
+                    "https://generativelanguage.googleapis.com/v1beta/models/" +
+                    model +
+                    ":generateContent?key=" +
+                    encodeURIComponent(API_KEY);
 
-                body: JSON.stringify({
+                const response =
+                    await fetch(url, {
 
-                    contents: [
+                        method: "POST",
 
-                        {
-                            role: "user",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-                            parts: [
+                        body: JSON.stringify({
+
+                            contents: [
 
                                 {
-                                    text: question
-                                },
+                                    role: "user",
 
-                                {
-                                    inline_data: {
-                                        mime_type:
-                                            mimeType,
-                                        data:
-                                            base64
-                                    }
+                                    parts: [
+
+                                        {
+                                            text:
+                                                question
+                                        },
+
+                                        {
+                                            inline_data: {
+                                                mime_type:
+                                                    mimeType,
+
+                                                data:
+                                                    base64
+                                            }
+                                        }
+
+                                    ]
                                 }
 
                             ]
-                        }
 
-                    ]
+                        })
+                    });
 
-                })
+                const data =
+                    await response.json();
 
-            });
+                if (!response.ok) {
 
+                    throw new Error(
+                        data?.error?.message ||
+                        `HTTP ${response.status}`
+                    );
+                }
 
-        const data =
-            await response.json();
+                const reply =
+                    data
+                        ?.candidates?.[0]
+                        ?.content?.parts
+                        ?.map(
+                            part =>
+                                part.text || ""
+                        )
+                        .join("")
+                        .trim();
 
+                if (!reply) {
 
-        if (!response.ok) {
+                    throw new Error(
+                        "Gemini returned no image response."
+                    );
+                }
 
-            throw new Error(
-                data?.error?.message ||
+                // Show Gemini response
+                message.textContent =
+                    "J.A.R.V.I.S: " +
+                    reply;
+
+                // Save image conversation
+                MEMORY.push({
+                    role: "user",
+                    text:
+                        "[Image] " +
+                        question
+                });
+
+                MEMORY.push({
+                    role: "model",
+                    text: reply
+                });
+
+                if (MEMORY.length > 50) {
+                    MEMORY =
+                        MEMORY.slice(-50);
+                }
+
+                saveMemory();
+
+                speak(reply);
+
+                return;
+
+            } catch (error) {
+
+                lastError =
+                    error;
+
+                console.warn(
+                    "Vision model failed:",
+                    model,
+                    error
+                );
+            }
+        }
+
+        throw (
+            lastError ||
+            new Error(
                 "Image analysis failed."
-            );
-        }
-
-
-        const reply =
-            data
-                ?.candidates?.[0]
-                ?.content?.parts
-                ?.map(
-                    part =>
-                        part.text || ""
-                )
-                .join("")
-                .trim();
-
-
-        if (!reply) {
-
-            throw new Error(
-                "No image response."
-            );
-        }
-
-
-        message.textContent =
-            "J.A.R.V.I.S: " +
-            reply;
-
-
-        MEMORY.push({
-            role: "user",
-            text: "[Image] " + question
-        });
-
-
-        MEMORY.push({
-            role: "model",
-            text: reply
-        });
-
-
-        saveMemory();
-
-
-        speak(reply);
-
+            )
+        );
 
     } catch (error) {
+
+        console.error(
+            "Vision error:",
+            error
+        );
 
         message.textContent =
             "J.A.R.V.I.S: ERROR - " +
             error.message;
     }
 }
-
-
 // ======================================================
 // VOICE
 // ======================================================
