@@ -9,17 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <meta
-        name="theme-color"
-        content="#000000"
-    >
+    <meta name="theme-color" content="#000000">
 
     <title>J.A.R.V.I.S Mobile Edition</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -35,13 +29,9 @@
     <section class="core-section">
 
         <div class="core">
-
             <div class="ring r1"></div>
-
             <div class="ring r2"></div>
-
             <div class="center"></div>
-
         </div>
 
         <p class="core-text">
@@ -83,13 +73,13 @@
     <!-- CHAT -->
 
     <section
-        class="chat"
         id="chat"
+        class="chat"
         aria-live="polite"
     ></section>
 
 
-    <!-- INPUT AREA -->
+    <!-- INPUT -->
 
     <section class="input-area">
 
@@ -107,21 +97,18 @@
             EXECUTE
         </button>
 
-
-        <!-- MIC / CAMERA / CLEAR BUTTONS
-             Loaded from mic-button.html -->
-
+        <!-- Separate controls file -->
         <div
             id="assistant-buttons"
             class="assistant-buttons"
         >
-            Loading controls...
+            Loading...
         </div>
 
     </section>
 
 
-    <!-- IMAGE INPUT -->
+    <!-- Image input -->
 
     <input
         id="img-input"
@@ -132,19 +119,21 @@
     >
 
 
+    <!-- Load controls -->
+
     <script>
 
-        // Load separate controls file
-        fetch("mic-button.html")
+        fetch("./mic-button.html")
             .then(response => {
 
                 if (!response.ok) {
                     throw new Error(
-                        "Could not load mic-button.html"
+                        "mic-button.html could not be loaded"
                     );
                 }
 
                 return response.text();
+
             })
 
             .then(html => {
@@ -153,27 +142,30 @@
                     "assistant-buttons"
                 ).innerHTML = html;
 
-                // Load script after controls exist
-                const script =
-                    document.createElement("script");
-
-                script.src = "script.js";
-
-                document.body.appendChild(script);
             })
 
             .catch(error => {
 
-                console.error(error);
+                console.error(
+                    "Controls error:",
+                    error
+                );
 
                 document.getElementById(
                     "assistant-buttons"
                 ).innerHTML =
-                    "Controls failed to load.";
+                    "<span>Controls unavailable</span>";
 
             });
 
     </script>
+
+
+    <!-- IMPORTANT:
+         Load JavaScript normally.
+         Do NOT load it from inside fetch(). -->
+
+    <script src="./script.js"></script>
 
 </body>
 
