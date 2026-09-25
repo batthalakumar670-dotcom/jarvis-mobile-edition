@@ -591,6 +591,160 @@ async function askVision(
 
     try {
 
+// ======================================================
+// IMAGE / CAMERA
+// ======================================================
+
+if (imgInput) {
+
+    imgInput.addEventListener("change", function(event) {
+
+        const file = event.target.files?.[0];
+
+        // Reset immediately so the same photo can be selected again
+        event.target.value = "";
+
+        if (!file) {
+            addMessage(
+                "J.A.R.V.I.S: No photo received.",
+                "ai"
+            );
+            return;
+        }
+
+        // Show immediately that JARVIS received the photo
+        addMessage(
+            "YOU: 📷 Photo received. Processing...",
+            "user"
+        );
+
+        // Check image
+        if (!file.type || !file.type.startsWith("image/")) {
+
+            addMessage(
+                "J.A.R.V.I.S: This file is not a supported image.",
+                "ai"
+            );
+
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = async function() {
+
+            try {
+
+                const result = reader.result;
+
+                if (typeof result !== "string") {
+                    throw new Error(
+                        "Could not read the photo."
+                    );
+                }
+
+                const base64 =
+                    result.split(",")[1];
+
+                if (!base64) {
+                    throw new Error(
+                        "Photo data is empty."
+                    );
+                }
+
+                // Show actual image in chat
+                const userMessage =
+                    document.createElement("div");
+
+                userMessage.className =
+                    "msg user";
+
+                const label =
+                    document.createElement("div");
+
+                label.textContent =
+                    "YOU: 📷";
+
+                userMessage.appendChild(label);
+
+                const image =
+                    document.createElement("img");
+
+                image.src = result;
+                image.alt = "Captured photo";
+
+                image.style.width = "280px";
+                image.style.maxWidth = "100%";
+                image.style.borderRadius = "12px";
+                image.style.marginTop = "8px";
+                image.style.display = "block";
+
+                userMessage.appendChild(image);
+
+                chat.appendChild(userMessage);
+
+                chat.scrollTop =
+                    chat.scrollHeight;
+
+                const question =
+                    input.value.trim() ||
+                    "Describe this image.";
+
+                input.value = "";
+
+                // Send to Gemini
+                await askVision(
+                    base64,
+                    file.type,
+                    question
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Photo processing error:",
+                    error
+                );
+
+                addMessage(
+                    "J.A.R.V.I.S: ERROR - " +
+                    error.message,
+                    "ai"
+                );
+            }
+        };
+
+        reader.onerror = function() {
+
+            addMessage(
+                "J.A.R.V.I.S: Failed to read the photo.",
+                "ai"
+            );
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+
+// ======================================================
+// VISION
+// ======================================================
+
+async function askVision(
+    base64,
+    mimeType,
+    question
+) {
+
+    const message =
+        addMessage(
+            "J.A.R.V.I.S: Analyzing image...",
+            "ai"
+        );
+
+    try {
+
         if (!API_KEY) {
             throw new Error(
                 "Gemini API key is missing."
@@ -660,6 +814,84 @@ async function askVision(
                         data?.error?.message ||
                         `HTTP ${response.status}`
                     );
+                }
+
+                const reply =
+                    data
+                        ?.candidates?.[0]
+                        ?.content?.parts
+                        ?.map(
+                            part =>
+                                part.text || ""
+                        )
+                        .join("")
+                        .trim();
+
+                if (!reply) {
+
+                    throw new Error(
+                        "Gemini returned no image response."
+                    );
+                }
+
+                message.textContent =
+                    "J.A.R.V.I.S: " +
+                    reply;
+
+                MEMORY.push({
+                    role: "user",
+                    text:
+                        "[Image] " +
+                        question
+                });
+
+                MEMORY.push({
+                    role: "model",
+                    text: reply
+                });
+
+                if (MEMORY.length > 50) {
+                    MEMORY =
+                        MEMORY.slice(-50);
+                }
+
+                saveMemory();
+
+                speak(reply);
+
+                return;
+
+            } catch (error) {
+
+                lastError = error;
+
+                console.warn(
+                    "Vision model failed:",
+                    model,
+                    error
+                );
+            }
+        }
+
+        throw (
+            lastError ||
+            new Error(
+                "Image analysis failed."
+            )
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Vision error:",
+            error
+        );
+
+        message.textContent =
+            "J.A.R.V.I.S: ERROR - " +
+            error.message;
+    }
+}
                 }
 
                 const reply =
