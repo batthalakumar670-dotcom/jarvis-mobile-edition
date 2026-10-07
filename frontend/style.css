@@ -144,4 +144,100 @@ body.is-thinking .hero-orb .orb-aura{animation-duration:1.2s}
 @keyframes activityIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes settingsIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
 @keyframes tiltOrbit{from{transform:rotateX(66deg) rotateZ(0)}to{transform:rotateX(66deg) rotateZ(360deg)}}
-@keyframes innerOrbit{from{transform:rotateY(68deg) rotateZ(0)}to{transform:rotateY(68deg) r
+@keyframes innerOrbit{from{transform:rotateY(68deg) rotateZ(0)}to{transform:rotateY(68deg) rotateZ(360deg)}}
+@keyframes auraPulse{0%,100%{opacity:.58;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes beamScan{0%,100%{top:29%;opacity:0}18%,72%{opacity:.58}50%{top:69%;opacity:.68}}
+@keyframes particleFloat{0%,100%{transform:translate3d(0,0,0);opacity:.45}50%{transform:translate3d(3px,-8px,0);opacity:1}}
+body.sidebar-collapsed .app-shell{grid-template-columns:78px minmax(0,1fr)}
+body.sidebar-collapsed .topbar,body.sidebar-collapsed .composer-dock{left:78px}
+body.sidebar-collapsed .sidebar{padding-right:10px;padding-left:10px}
+body.sidebar-collapsed .brand-copy,body.sidebar-collapsed .new-chat>span:last-child,body.sidebar-collapsed .history-heading,body.sidebar-collapsed .history-item-label,body.sidebar-collapsed .sidebar-link>span,body.sidebar-collapsed .profile-name,body.sidebar-collapsed .profile-label{display:none}
+body.sidebar-collapsed .sidebar-top{justify-content:center;padding-right:0;padding-left:0}
+body.sidebar-collapsed .sidebar-collapse{display:none}
+body.sidebar-collapsed .new-chat{justify-content:center;padding:0}
+body.sidebar-collapsed .history-list{gap:5px}
+body.sidebar-collapsed .history-item{justify-content:center;padding:8px 0}
+body.sidebar-collapsed .sidebar-link{justify-content:center;padding:10px 0}
+body.sidebar-collapsed .profile-row{justify-content:center;padding-right:0;padding-left:0}
+@media(max-width:780px){
+  .app-shell{grid-template-columns:minmax(0,1fr)}
+  .main-area{grid-column:1;min-height:0;height:100dvh}
+  .conversation-stage{top:58px;bottom:106px}
+  .sidebar{position:fixed;inset:0 auto 0 0;width:min(290px,84vw);height:100dvh;transform:translateX(-102%);box-shadow:var(--shadow)}
+  body.sidebar-open .sidebar{transform:translateX(0)}
+  .sidebar-backdrop:not([hidden]){position:fixed;inset:0;z-index:29;display:block;width:100%;height:100%;border:0;background:rgba(3,5,9,.52);backdrop-filter:blur(2px)}
+  body.sidebar-collapsed .app-shell{grid-template-columns:minmax(0,1fr)}
+  body.sidebar-collapsed .sidebar{width:min(290px,84vw);padding:20px 13px 14px}
+  body.sidebar-collapsed .topbar,body.sidebar-collapsed .composer-dock{left:0}
+  body.sidebar-collapsed .brand-copy,body.sidebar-collapsed .new-chat>span:last-child,body.sidebar-collapsed .history-heading,body.sidebar-collapsed .history-item-label,body.sidebar-collapsed .sidebar-link>span,body.sidebar-collapsed .profile-name,body.sidebar-collapsed .profile-label{display:initial}
+  body.sidebar-collapsed .sidebar-top{justify-content:space-between;padding:0 5px 22px}
+  body.sidebar-collapsed .sidebar-collapse{display:grid}
+  body.sidebar-collapsed .new-chat{justify-content:flex-start;padding:0 12px}
+  body.sidebar-collapsed .history-item{justify-content:flex-start;padding:8px 10px}
+  body.sidebar-collapsed .sidebar-link{justify-content:flex-start;padding:9px 10px}
+  body.sidebar-collapsed .profile-row{justify-content:flex-start;padding:8px 8px 2px}
+  .topbar{left:0;right:0;height:58px;min-height:58px;padding:0 14px;gap:8px}
+  .topbar-title{gap:7px;font-size:12px}.topbar-subtitle{display:none}
+  .topbar-actions{gap:7px}.ready-badge{padding:5px 7px;font-size:8px}
+  .welcome{width:min(100% - 30px,620px);padding:20px 0 28px}
+  .hero-orb{width:132px;height:132px;margin-bottom:22px}.orb-core{width:58px;height:58px;border-radius:50%}
+  .welcome-subtitle{font-size:13px;margin-bottom:24px}
+  .prompt-grid{gap:8px}.prompt-card{min-height:62px;padding:10px;gap:9px}.prompt-icon{width:30px;height:30px;flex-basis:30px}
+  .chat{padding:20px 16px 26px}
+  .msg{max-width:90%;font-size:13px}
+  .msg.ai{max-width:100%}
+  .composer-dock{left:0;right:0;padding:9px 11px max(10px,env(safe-area-inset-bottom))}
+  .composer-shell{min-height:56px;border-radius:19px;padding:7px 7px 7px 9px;gap:4px}
+  .composer-tool{width:34px;height:36px;flex-basis:34px}
+  .send-button{width:37px;height:37px;flex-basis:37px;border-radius:12px}
+  #msg{font-size:14px}
+  .composer-note{font-size:7px;letter-spacing:.08em;margin-top:7px}
+}
+@media(max-width:430px){
+  .ready-badge{display:none}
+  .welcome h1{font-size:29px}
+  .prompt-grid{grid-template-columns:1fr;width:min(100%,350px)}
+  .prompt-card{min-height:57px}
+  .note-separator{display:none}
+  .composer-note{max-width:340px;line-height:1.6}
+  .thinking-status{font-size:10px;padding:6px 10px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}\
+
+#jarvis-core-container {
+    width: 200px;       /* Size of the orb */
+    height: 200px;      /* Size of the orb */
+    margin: 20px auto;  /* Center it horizontally */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Optional: Add a glow effect to the canvas inside */
+#jarvis-core-container canvas {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.6)); /* Cyan Glow */
+    border-radius: 50%;
+}
+
+/* --- WAKE BUTTON STYLES --- */
+.wake-button {
+  position: relative;
+}
+
+/* When Wake Mode is ON, make the icon Green/Glowing */
+.wake-button.active svg {
+  stroke: #00ff00; /* Bright Green */
+  filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.5));
+}
+
+/* Optional: Pulse animation when listening */
+@keyframes pulse-wake {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.wake-button.listening svg {
+  animation: pulse-wake 1.5s infinite;
+}
