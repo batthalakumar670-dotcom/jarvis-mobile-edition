@@ -596,7 +596,7 @@ async function callGeminiRaw(prompt) {
   return requestGeminiInteraction([
     { type: 'user_input', content: [{ type: 'text', text: String(prompt) }] }
   ], '');
-}
+                     }
 
 async function runAgent(goal) {
   add('J.A.R.V.I.S: Agent mode active.', 'ai');
@@ -765,8 +765,7 @@ async function askGemini(p) {
     setThinking(false);
     if (wakeCommandPending && !wakeReplyPending) finishWakeReply();
   }
-}
-
+    }
 // ===== 5. VISION =====
 camBtn.onclick = () => imgInput.click();
 imgInput.onchange = () => {
@@ -855,7 +854,7 @@ function startRecognition(mode) {
   recognitionMode = mode || 'manual';
   rec.continuous = recognitionMode === 'wake';
   rec.interimResults = false;
-    try {
+  try {
     rec.start();
     recognitionActive = true;
     if (recognitionMode === 'manual') micBtn.classList.add('listening');
